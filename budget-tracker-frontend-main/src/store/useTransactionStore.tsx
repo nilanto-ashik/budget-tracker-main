@@ -43,8 +43,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const response = await transactionAPI.getAll({ search });
       get().setTransactions(response.data);
       get().setLoading(false);
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "Failed to fetch transactions");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Failed to fetch transactions");
       get().setLoading(false);
     }
   },

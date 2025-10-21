@@ -54,19 +54,17 @@ const TransactionForm: React.FC = () => {
     try {
       setLoading(true);
       const formattedValues = {
-        _id: editingTransactions?._id,
         type: values.type as string,
         amount: values.amount as number,
         description: values.description as string,
         date: values.date ? dayjs(values.date as string | Date).toISOString() : dayjs().toISOString(),
       };
       if (editingTransactions) {
-        await transactionAPI.update(formattedValues._id!, formattedValues as Transaction);
+        await transactionAPI.update(editingTransactions._id, formattedValues as Transaction);
         message.success("Transactions updated successfully");
         setMode("table");
       } else {
-        const { _id, ...createData } = formattedValues;
-        await transactionAPI.create(createData as Transaction);
+        await transactionAPI.create(formattedValues as Transaction);
         message.success("Transaction created successfully");
         setMode("table");
       }

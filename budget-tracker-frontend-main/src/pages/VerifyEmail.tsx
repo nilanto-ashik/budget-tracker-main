@@ -22,10 +22,11 @@ const VerifyEmail: React.FC = () => {
           );
           navigate("/login"); // Redirect to login page after successful verification
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (isMounted) {
+          const err = error as { response?: { data?: { message?: string } } };
           message.error(
-            error?.response?.data?.message || "Email verification failed"
+            err?.response?.data?.message || "Email verification failed"
           );
           navigate("/login"); // Redirect to login even in case of failure
         }

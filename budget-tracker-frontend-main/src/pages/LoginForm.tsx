@@ -42,7 +42,7 @@ const LoginForm: React.FC = () => {
     if (isAuthenticated) {
       navigate("/");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   return (
     <Space className="bg-slate-200/10 w-full h-screen flex justify-center">
