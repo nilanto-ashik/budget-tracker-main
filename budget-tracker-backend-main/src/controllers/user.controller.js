@@ -18,12 +18,26 @@ export const createUser = asyncHandler(async (req, res) => {
         })
     }
 
-    const user = await User.create({ ...req.body, verified: true });
+    const user = await User.create({ ...req.body, verified: false });
+
+    const verificationToken = await user.generateVerificationToken();
+
+    const verificationURL = `${process.env.USER_URL}/verify-email/${verificationToken}`;
+
+    const subject = "Email Verification - Budget Tracker App";
+    const message = `
+        <h1>Email Verification</h1>
+        <p>Please click the link below to verify your email:</p>
+        <a href="${verificationURL}" target="_blank">Verify Email</a>
+        <p>This link is valid for 15 minutes.</p>
+    `;
+
+    await sendEmail(user.email, subject, message);
 
     return ResponseData(res, {
         statusCode: 201,
         data: user,
-        message: "User created successfully.",
+        message: "User created successfully. Please check your email to verify your account.",
     });
 })
 
@@ -86,11 +100,11 @@ export const loginUser = asyncHandler(async (req, res) => {
         sameSite: "Strict",
     });
 
-    const loginDatails = await User.findOne({ email });
+    const loginDetails = await User.findOne({ email }).select("-password -refreshToken");
 
     return ResponseData(res, {
         statusCode: 200,
-        data: loginDatails,
+        data: loginDetails,
         message: "User logged in successfully",
     });
 

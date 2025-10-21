@@ -5,7 +5,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { userAPI } from "../api/endpoints/user";
 import { useUserStore } from "../store/useUserStore";
 import { useThemeStore } from "../store/useThemeStore";
-import { Spin } from "antd";
+import { Spin, message } from "antd";
 import ThemeToggle from '../components/ThemeToggle';
 
 const RootLayout: React.FC = () => {
@@ -22,10 +22,12 @@ const RootLayout: React.FC = () => {
     setLoading(true);
     try {
       await userAPI.logout();
+      logout();
+      message.success("Logged out successfully");
     } catch (error) {
       console.error("Logout failed:", error);
+      logout(); // Still logout locally even if API call fails
     } finally {
-      logout();
       setLoading(false);
     }
   };

@@ -8,7 +8,11 @@ import TransactionTable from "../components/TransactionTable";
 const { Title } = Typography;
 
 const Dashboard: React.FC = () => {
-  const { mode, setMode, setEditingTransactions } = useTransactionStore();
+  const { mode, setMode, setEditingTransactions, fetchTransactions } = useTransactionStore();
+
+  React.useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
   return (
     <Space direction="vertical" style={{ width: "100%" }} className="mt-5">
       <Flex justify="space-between">

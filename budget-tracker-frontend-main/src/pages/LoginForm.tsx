@@ -22,15 +22,17 @@ const LoginForm: React.FC = () => {
   const { setLoading, loading, login, isAuthenticated } = useUserStore();
   const navigate = useNavigate();
 
-  const handelLogin = async (values: any) => {
+  const handelLogin = async (values: { email: string; password: string }) => {
     try {
       setLoading(true);
       const response = await userAPI.login(values);
       const { accessToken } = response.data;
-      login(values, accessToken);
+      const user = response.data;
+      login(user, accessToken);
       message.success(response?.message || "Login Success");
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "Login failed");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }

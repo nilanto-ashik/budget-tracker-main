@@ -3,11 +3,32 @@ import ResponseData from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 export const createTransaction = asyncHandler(async (req, res) => {
+    const { type, amount, description, date } = req.body;
 
-    const transactionDetails = await Transaction.create({ ...req.body, user: req.user._id });
+    if (!type || !amount || !description) {
+        return ResponseData(res, {
+            statusCode: 400,
+            message: "Type, amount, and description are required",
+        });
+    }
+
+    if (amount <= 0) {
+        return ResponseData(res, {
+            statusCode: 400,
+            message: "Amount must be greater than 0",
+        });
+    }
+
+    const transactionDetails = await Transaction.create({
+        type,
+        amount,
+        description,
+        date: date ? new Date(date) : new Date(),
+        user: req.user._id
+    });
 
     return ResponseData(res, {
-        statusCode: 200,
+        statusCode: 201,
         data: transactionDetails,
         message: "Transaction created successfully",
     })

@@ -5,7 +5,7 @@ interface Transaction {
   type: string;
   amount: number;
   description: string;
-  date: string;
+  date: string | Date;
 }
 
 interface ApiResponse<T> {
@@ -40,8 +40,16 @@ export const transactionAPI = {
     return response.data;
   },
 
-  getAnalytics: async (): Promise<ApiResponse<Transaction[]>> => {
-    const response = await api.get("/transactions/list");
+  getAnalytics: async (): Promise<ApiResponse<{
+    sepIncomeData: number[];
+    sepExpenseData: number[];
+    nameIncomeData: string[];
+    nameExpenseData: string[];
+    totalIncome: number;
+    totalExpense: number;
+    netAmount: number;
+  }>> => {
+    const response = await api.get("/transactions/analytics");
     return response.data;
   },
 };

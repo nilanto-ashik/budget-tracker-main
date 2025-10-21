@@ -18,6 +18,14 @@ import React, { useEffect } from "react";
 import { useTransactionStore } from "../store/useTransactionStore";
 import { transactionAPI } from "../api/endpoints/transaction";
 
+interface Transaction {
+  _id: string;
+  type: string;
+  amount: number;
+  description: string;
+  date: string | Date;
+}
+
 const TransactionForm: React.FC = () => {
   const TransactionType: string[] = ["Income", "Expense"];
 
@@ -35,33 +43,37 @@ const TransactionForm: React.FC = () => {
       const formattedTransaction = {
         ...editingTransactions,
         date: editingTransactions.date
-          ? dayjs(editingTransactions.date, "DD/MM/YYYY")
-          : null,
+          ? dayjs(editingTransactions.date)
+          : dayjs(),
       };
       form.setFieldsValue(formattedTransaction);
     }
   }, [editingTransactions, form]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: Record<string, unknown>) => {
     try {
       setLoading(true);
       const formattedValues = {
-        ...values,
         _id: editingTransactions?._id,
-        date: values.date ? dayjs(values.date).format("DD/MM/YYYY") : null,
+        type: values.type as string,
+        amount: values.amount as number,
+        description: values.description as string,
+        date: values.date ? dayjs(values.date as string | Date).toISOString() : dayjs().toISOString(),
       };
       if (editingTransactions) {
-        await transactionAPI.update(formattedValues._id, formattedValues);
+        await transactionAPI.update(formattedValues._id!, formattedValues as Transaction);
         message.success("Transactions updated successfully");
         setMode("table");
       } else {
-        await transactionAPI.create(formattedValues);
+        const { _id, ...createData } = formattedValues;
+        await transactionAPI.create(createData as Transaction);
         message.success("Transaction created successfully");
         setMode("table");
       }
       setEditingTransactions(null);
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "An error occurred");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -102,27 +114,31 @@ const TransactionForm: React.FC = () => {
                     label="Amount"
                     rules={[
                       {
-                        validator: (_, value) => {
-                          if (value < 0) {
-                            return Promise.reject(
-                              new Error("Please enter valid amount!")
-                            );
-                          } else {
-                            return Promise.resolve();
-                          }
-                        },
-                      },
-                      {
                         required: true,
                         message: "Please enter amount!",
                       },
+                      {
+                        type: "number",
+                        min: 0.01,
+                        message: "Amount must be greater than 0!",
+                      },
                     ]}
                   >
-                    <Input type="number" placeholder="Enter Amount" />
+                    <Input type="number" min="0.01" step="0.01" placeholder="Enter Amount" />
                   </Form.Item>
                 </Col>
                 <Col xs={24} sm={12} md={8}>
-                  <Form.Item name="date" label="Date" initialValue={dayjs()}>
+                  <Form.Item
+                    name="date"
+                    label="Date"
+                    initialValue={dayjs()}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please select a date!",
+                      },
+                    ]}
+                  >
                     <DatePicker
                       style={{ width: "100%" }}
                       format="DD/MM/YYYY"

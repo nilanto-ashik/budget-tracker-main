@@ -23,7 +23,7 @@ const ResetPassword: React.FC = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   
-  const handleResetPassword = async (values: any) => {
+  const handleResetPassword = async (values: Record<string, unknown>) => {
     const { password, confPassword } = values;
 
     if (password !== confPassword) {
@@ -32,15 +32,14 @@ const ResetPassword: React.FC = () => {
     }
 
     try {
-      console.log(values);
-
-      const response = await userAPI.resetPassword(token, values);
+      const response = await userAPI.resetPassword(token, { password: values.password as string });
       message.success(
         response?.data?.message || "Password reset successfully!"
       );
       navigate("/login");
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "Password reset failed!");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Password reset failed!");
     } finally {
       setLoading(false);
     }

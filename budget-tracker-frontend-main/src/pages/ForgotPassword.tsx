@@ -20,14 +20,15 @@ const ForgotPassword: React.FC = () => {
   const [form] = Form.useForm();
   const { loading, setLoading } = useUserStore();
 
-  const handleForgotPassword = async (values: any) => {
+  const handleForgotPassword = async (values: { email: string }) => {
     try {
       setLoading(true);
       const response = await userAPI.forgotPassword(values);
       form.resetFields();
       message.success(response?.data?.message || "Please check your email");
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "Internal Server Error");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Internal Server Error");
     } finally {
       setLoading(false);
     }

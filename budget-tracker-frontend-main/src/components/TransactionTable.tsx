@@ -10,7 +10,7 @@ interface Transaction {
   type: string;
   amount: number;
   description: string;
-  date: string;
+  date: string | Date;
 }
 
 const TransactionTable: React.FC = () => {
@@ -24,7 +24,7 @@ const TransactionTable: React.FC = () => {
   } = useTransactionStore();
 
   const handleSearch = useCallback(
-    (e: any) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchText(e.target.value);
       fetchTransactions(e.target.value);
     },
@@ -54,8 +54,9 @@ const TransactionTable: React.FC = () => {
       await transactionAPI.delete(id);
       message.success("Transaction deleted successfully");
       fetchTransactions(searchText);
-    } catch (error: any) {
-      message.error(error?.response?.data?.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Failed to delete transaction");
     }
   };
 
@@ -90,7 +91,7 @@ const TransactionTable: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: Transaction) => (
+      render: (_: unknown, record: Transaction) => (
         <Space size={0}>
           <Tooltip title="Edit Transaction">
             <Button

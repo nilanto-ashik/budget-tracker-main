@@ -22,14 +22,15 @@ const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
 
   const { setLoading, loading } = useUserStore();
-  const handelRegister = async (values: any) => {
+  const handelRegister = async (values: { name: string; email: string; password: string }) => {
     try {
       setLoading(true);
       const response = await userAPI.create(values);
       message.success(response?.data?.message || "Register Success");
       navigate("/login");
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || "Register failed");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Register failed");
     } finally {
       setLoading(false);
     }

@@ -17,13 +17,13 @@ interface UserResponse<T> {
 
 export const userAPI = {
   create: async (
-    data: UsersDataField
+    data: { name: string; email: string; password: string }
   ): Promise<UserResponse<UsersDataField>> => {
     return await api.post("/users", data);
   },
 
   login: async (
-    data: UsersDataField
+    data: { email: string; password: string }
   ): Promise<UserResponse<UsersDataField>> => {
     const response = await api.post("/users/login", data);
     return response.data;
@@ -37,11 +37,11 @@ export const userAPI = {
     return await api.get(`/users/verify-email/${token}`);
   },
 
-  forgotPassword: async (email: string) => {
-    return await api.post(`/users/forgot-password`, email);
+  forgotPassword: async (data: { email: string }) => {
+    return await api.post(`/users/forgot-password`, data);
   },
 
-  resetPassword: async (token: string | undefined, password: string) => {
-    return await api.post(`/users/reset-password/${token}`, password);
+  resetPassword: async (token: string | undefined, data: { password: string }) => {
+    return await api.post(`/users/reset-password/${token}`, data);
   },
 };

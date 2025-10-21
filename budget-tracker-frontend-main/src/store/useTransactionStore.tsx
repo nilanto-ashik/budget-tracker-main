@@ -7,7 +7,7 @@ interface Transaction {
   type: string;
   amount: number;
   description: string;
-  date: string;
+  date: string | Date;
 }
 
 interface TransactionState {
@@ -39,10 +39,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
   fetchTransactions: async (search) => {
     try {
+      get().setLoading(true);
       const response = await transactionAPI.getAll({ search });
       get().setTransactions(response.data);
+      get().setLoading(false);
     } catch (error: any) {
-      message.error(error?.response?.data?.message);
+      message.error(error?.response?.data?.message || "Failed to fetch transactions");
+      get().setLoading(false);
     }
   },
 }));

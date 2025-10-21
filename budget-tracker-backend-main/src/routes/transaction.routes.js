@@ -8,6 +8,6 @@ router.get("/", authenticateUser, getAllTransactions);
 router.post("/", authenticateUser, createTransaction);
 router.put("/:_id", authenticateUser, updateTransaction);
 router.delete("/:_id", authenticateUser, deleteTransaction);
-router.get("/list", authenticateUser, getAnalytics);
+router.get("/analytics", authenticateUser, getAnalytics);
 
 export default router;

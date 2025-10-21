@@ -7,7 +7,15 @@ interface AnalyticsCardProps {
   title: string;
   amount: number;
   type: string;
-  chartData: any;
+  chartData: {
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      backgroundColor: string[];
+      hoverOffset?: number;
+    }[];
+  } & Record<string, unknown>;
 }
 
 const { Title, Text } = Typography;

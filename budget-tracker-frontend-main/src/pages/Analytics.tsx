@@ -18,37 +18,45 @@ import AnalyticsCard from "../components/AnalyticsCard";
 ChartJS.register(CategoryScale, LinearScale, ArcElement, ChartTooltip, Legend);
 
 const Analytics: React.FC = () => {
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [analyticsData, setAnalyticsData] = useState<{
+    sepIncomeData: number[];
+    sepExpenseData: number[];
+    nameIncomeData: string[];
+    nameExpenseData: string[];
+    totalIncome: number;
+    totalExpense: number;
+    netAmount: number;
+  } | null>(null);
 
   const { loading, setLoading } = useTransactionStore();
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-        const response = await transactionAPI.getAnalytics();
-        setAnalyticsData(response.data);
-      } catch (error: any) {
-        message.error(error?.response?.data?.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const response = await transactionAPI.getAnalytics();
+      setAnalyticsData(response.data);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err?.response?.data?.message || "Failed to fetch analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
     fetchAnalytics();
   }, [setLoading]);
 
-  function getRandomColor() {
-    const letters = "0123456789ABCDEF";
-    let color = "#";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+  function getConsistentColor(index: number): string {
+    const colors = [
+      "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+      "#FF9F40", "#FF6384", "#C9CBCF", "#4BC0C0", "#FF6384"
+    ];
+    return colors[index % colors.length];
   }
 
   const hasData =
-    analyticsData?.sepExpenseData?.length > 0 ||
-    analyticsData?.sepIncomeData?.length > 0;
+    (analyticsData?.sepExpenseData?.length ?? 0) > 0 ||
+    (analyticsData?.sepIncomeData?.length ?? 0) > 0;
 
   return (
     <Space direction="vertical" style={{ width: "100%" }} className="mt-5">
@@ -57,7 +65,7 @@ const Analytics: React.FC = () => {
         <div className="flex justify-center items-center flex-wrap gap-10">
           {loading ? (
             <Spin tip="Loading..." size="large" />
-          ) : hasData ? (
+          ) : hasData && analyticsData ? (
             <>
               <AnalyticsCard
                 title="Income"
@@ -69,8 +77,8 @@ const Analytics: React.FC = () => {
                     {
                       label: "Income",
                       data: analyticsData.sepIncomeData,
-                      backgroundColor: analyticsData.nameIncomeData.map(() =>
-                        getRandomColor()
+                      backgroundColor: analyticsData.nameIncomeData.map((_: string, index: number) =>
+                        getConsistentColor(index)
                       ),
                     },
                   ],
@@ -87,8 +95,8 @@ const Analytics: React.FC = () => {
                     {
                       label: "Expense",
                       data: analyticsData.sepExpenseData,
-                      backgroundColor: analyticsData.nameExpenseData.map(() =>
-                        getRandomColor()
+                      backgroundColor: analyticsData.nameExpenseData.map((_: string, index: number) =>
+                        getConsistentColor(index)
                       ),
                     },
                   ],
