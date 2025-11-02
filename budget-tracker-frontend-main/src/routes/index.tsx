@@ -11,7 +11,7 @@ import LoginForm from "../pages/LoginForm";
 import RootLayout from "../layout/RootLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import RegisterForm from "../pages/RegisterForm";
-import VerifyEmail from "../pages/VerifyEmail";
+
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 
@@ -20,7 +20,7 @@ const router = createBrowserRouter(
     <Route path="/">
       <Route path="login" element={<LoginForm />} />
       <Route path="register" element={<RegisterForm />} />
-      <Route path="verify-email/:token" element={<VerifyEmail />} />
+
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="reset-password/:token" element={<ResetPassword />} />
       <Route element={<ProtectedRoute />}>

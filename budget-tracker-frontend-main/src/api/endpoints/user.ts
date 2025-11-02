@@ -33,9 +33,7 @@ export const userAPI = {
     return await api.post("/users/logout");
   },
 
-  verifyEmail: async (token: string) => {
-    return await api.get(`/users/verify-email/${token}`);
-  },
+
 
   forgotPassword: async (data: { email: string }) => {
     return await api.post(`/users/forgot-password`, data);

@@ -18,26 +18,12 @@ export const createUser = asyncHandler(async (req, res) => {
         })
     }
 
-    const user = await User.create({ ...req.body, verified: false });
-
-    const verificationToken = await user.generateVerificationToken();
-
-    const verificationURL = `${process.env.USER_URL}/verify-email/${verificationToken}`;
-
-    const subject = "Email Verification - Budget Tracker App";
-    const message = `
-        <h1>Email Verification</h1>
-        <p>Please click the link below to verify your email:</p>
-        <a href="${verificationURL}" target="_blank">Verify Email</a>
-        <p>This link is valid for 15 minutes.</p>
-    `;
-
-    await sendEmail(user.email, subject, message);
+    const user = await User.create(req.body);
 
     return ResponseData(res, {
         statusCode: 201,
         data: user,
-        message: "User created successfully. Please check your email to verify your account.",
+        message: "User created successfully.",
     });
 })
 
@@ -70,12 +56,7 @@ export const loginUser = asyncHandler(async (req, res) => {
         })
     }
 
-    if (!user.verified) {
-        return ResponseData(res, {
-            statusCode: 400,
-            message: "Please verify your email",
-        })
-    }
+
 
     if (!user || !(await user.verifyPassword(password))) {
         return ResponseData(res, {
@@ -130,36 +111,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
     });
 })
 
-export const verifyEmail = asyncHandler(async (req, res) => {
-    const { token } = req.params;
 
-    if (!token) {
-        return ResponseData(res, {
-            statusCode: 400,
-            message: "Invalid verification token",
-        });
-    }
-
-    try {
-        const decode = jwt.verify(token, process.env.VERIFICATION_TOKEN_SECRET);
-
-        const user = await User.findByIdAndUpdate(
-            decode._id,
-            { $set: { verified: true } },
-            { new: true }
-        );
-
-        return ResponseData(res, {
-            statusCode: 200,
-            message: "Email verified successfully",
-        });
-    } catch (error) {
-        return ResponseData(res, {
-            statusCode: 400,
-            message: "Invalid or expired token",
-        });
-    }
-})
 
 export const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;

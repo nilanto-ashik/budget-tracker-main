@@ -36,6 +36,7 @@ const TransactionForm: React.FC = () => {
     setMode,
     setLoading,
     setEditingTransactions,
+    fetchTransactions,
   } = useTransactionStore();
 
   useEffect(() => {
@@ -51,6 +52,8 @@ const TransactionForm: React.FC = () => {
   }, [editingTransactions, form]);
 
   const handleSubmit = async (values: Record<string, unknown>) => {
+    console.log("handleSubmit called with values:", values);
+    console.log("Form validation passed");
     try {
       setLoading(true);
       const formattedValues = {
@@ -60,16 +63,21 @@ const TransactionForm: React.FC = () => {
         date: values.date ? dayjs(values.date as string | Date).toISOString() : dayjs().toISOString(),
       };
       if (editingTransactions) {
+        console.log("Updating transaction:", editingTransactions._id, formattedValues);
         await transactionAPI.update(editingTransactions._id, formattedValues as Transaction);
         message.success("Transactions updated successfully");
         setMode("table");
+        fetchTransactions();
       } else {
+        console.log("Creating transaction:", formattedValues);
         await transactionAPI.create(formattedValues as Transaction);
         message.success("Transaction created successfully");
         setMode("table");
+        fetchTransactions();
       }
       setEditingTransactions(null);
     } catch (error: unknown) {
+      console.error("Error in handleSubmit:", error);
       const err = error as { response?: { data?: { message?: string } } };
       message.error(err?.response?.data?.message || "An error occurred");
     } finally {
@@ -84,7 +92,20 @@ const TransactionForm: React.FC = () => {
           <Spin tip="Loading..." size="large" fullscreen />
         ) : (
           <>
-            <Form form={form} layout="vertical" onFinish={handleSubmit}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              onFinishFailed={(errorInfo) => {
+                console.log("Form validation failed:", errorInfo);
+                console.log("Error fields:", JSON.stringify(errorInfo.errorFields, null, 2));
+                console.log("Values:", errorInfo.values);
+                // Show validation errors to user
+                errorInfo.errorFields.forEach(field => {
+                  console.log(`Field ${field.name}: ${field.errors.join(', ')}`);
+                });
+              }}
+            >
               <Row gutter={16} className="grid-cols-1">
                 <Col xs={24} sm={12} md={8}>
                   <Form.Item
@@ -119,6 +140,7 @@ const TransactionForm: React.FC = () => {
                         type: "number",
                         min: 0.01,
                         message: "Amount must be greater than 0!",
+                        transform: (value) => parseFloat(value),
                       },
                     ]}
                   >
@@ -172,6 +194,7 @@ const TransactionForm: React.FC = () => {
                     <Button
                       className="bg-sky-600 !text-gray-50 hover:!bg-sky-600"
                       htmlType="submit"
+                      onClick={() => console.log("Save button clicked")}
                     >
                       Save
                     </Button>
