@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "https://budget-tracker-backend-main-g9266or9f.vercel.app";
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_URL,
